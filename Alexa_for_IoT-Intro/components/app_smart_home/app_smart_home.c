@@ -9,6 +9,19 @@
 #include <smart_home.h>
 #include <alexa_smart_home.h>
 
+#include "axp192.h"
+static uint8_t CURRENT_BLINK_DELAY = 20;
+static uint8_t GREEN_LIGHT_STATUS = 0;
+
+static void startLightBlink(int count)
+{    
+    //we want to start toggling based on the opposite status of what the light currently is
+    for(int i = 1 + GREEN_LIGHT_STATUS; i <= count*2+GREEN_LIGHT_STATUS ; i++) {               
+        Axp192_SetGPIO1Mode( i % 2 );
+        vTaskDelay(CURRENT_BLINK_DELAY);
+    }
+}
+
 static const char *TAG = "[app_smart_home]";
 
 void app_device_driver_init()
@@ -93,8 +106,17 @@ static esp_err_t write_cb(const smart_home_device_t *device, const smart_home_pa
 
     if (val.type == SMART_HOME_VAL_TYPE_BOOLEAN) {
         printf("%s: *************** %s's %s turned %s ***************\n", TAG, device_name, param_name, val.val.b ? "ON" : "OFF");
+    
+        //Set the global GREEN_LIGHT_STATUS variable to the desired value and set the GPIO1 value the right setting (on/off)
+        GREEN_LIGHT_STATUS = val.val.b ? 0 : 1;
+        Axp192_SetGPIO1Mode(GREEN_LIGHT_STATUS);
+
     } else if (val.type == SMART_HOME_VAL_TYPE_INTEGER) {
         printf("%s: *************** %s's %s changed to %d ***************\n", TAG, device_name, param_name, val.val.i);
+
+        //call the Trigger Light Blink based on the desired number of actions
+        startLightBlink(val.val.i);        
+
     } else if (val.type == SMART_HOME_VAL_TYPE_STRING) {
         printf("%s: *************** %s's %s changed to %s ***************\n", TAG, device_name, param_name, val.val.s);
     } else {
@@ -119,7 +141,7 @@ esp_err_t app_smart_home_init()
     const smart_home_node_t *node = smart_home_get_node();
 
     /* Add device */
-    smart_home_device_t *device = smart_home_device_create("Light", alexa_smart_home_get_device_type_str(LIGHT), NULL);
+    smart_home_device_t *device = smart_home_device_create("Green Light", alexa_smart_home_get_device_type_str(LIGHT), NULL);
     smart_home_device_add_cb(device, write_cb, NULL);
     smart_home_node_add_device(node, device);
 
@@ -142,9 +164,9 @@ esp_err_t app_smart_home_init()
     smart_home_param_t *power_param = smart_home_param_create("Power", SMART_HOME_PARAM_POWER, smart_home_bool(true), SMART_HOME_PROP_FLAG_READ | SMART_HOME_PROP_FLAG_WRITE | SMART_HOME_PROP_FLAG_PERSIST);
     smart_home_device_add_param(device, power_param);
 
-    smart_home_param_t *brightness_param = smart_home_param_create("Brightness", SMART_HOME_PARAM_RANGE, smart_home_int(100), SMART_HOME_PROP_FLAG_READ | SMART_HOME_PROP_FLAG_WRITE | SMART_HOME_PROP_FLAG_PERSIST);
-    smart_home_param_add_bounds(brightness_param, smart_home_int(0), smart_home_int(100), smart_home_int(1));
-    smart_home_device_add_param(device, brightness_param);
+    smart_home_param_t *blink_param = smart_home_param_create("Blink", SMART_HOME_PARAM_RANGE, smart_home_int(10), SMART_HOME_PROP_FLAG_READ | SMART_HOME_PROP_FLAG_WRITE | SMART_HOME_PROP_FLAG_PERSIST);
+    smart_home_param_add_bounds(blink_param, smart_home_int(0), smart_home_int(10), smart_home_int(1));
+    smart_home_device_add_param(device, blink_param);
 
     return ESP_OK;
 }

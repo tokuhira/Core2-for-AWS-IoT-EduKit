@@ -504,7 +504,7 @@ display_textarea_add("\n\nDevice client Id:\n>> %s <<\n", CLIENT_ID, (size_t *) 
         ESP_LOGI(TAG, "*****************************************************************************************");
         ESP_LOGI(TAG, "Stack remaining for task '%s' is %d bytes", pcTaskGetTaskName(NULL), uxTaskGetStackHighWaterMark(NULL));
 
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        vTaskDelay(10000 / portTICK_RATE_MS); // (1000 / portTICK_RATE_MS);
     }
 
     if(SUCCESS != rc) {
