@@ -53,7 +53,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname( __file__ ), "..", 
 import helper_scripts as esp_hs
 
 # Import the Microchip Trust Platform Design Suite libraries
-trustplatform_path = os.path.join(os.getcwd(), "..", "cryptoauth_trustplatform_designsuite", "assets", "python")
+trustplatform_path = os.path.join(os.getcwd(), "..", "trustplatform", "assets", "python")
 sys.path.append(trustplatform_path)
 import certs_handler
 import trustplatform
@@ -61,7 +61,7 @@ from requirements_helper import requirements_installer
 import manifest_helper
 
 # Import the Microchip Trust Platform Design Suite AWS and manifest helper libraries
-trustplatform_aws_path = os.path.join(os.getcwd(), "..", "cryptoauth_trustplatform_designsuite", "TrustnGO", "05_cloud_connect", "notebook", "aws")
+trustplatform_aws_path = os.path.join(os.getcwd(), "..", "trustplatform", "TrustnGO")
 sys.path.append(trustplatform_aws_path)
 from helper_aws import *
 from Microchip_manifest_handler import *
@@ -81,7 +81,7 @@ def check_environment():
         print("The 'edukit' Conda environment is not created or activated:\n  To install miniconda, visit https://docs.conda.io/en/latest/miniconda.html.\n  To create the environment, use the command 'conda create -n edukit python=3.7'\n  To activate the environment, use the command 'conda activate edukit'\n")
     print("Conda 'edukit' environment active...")
     
-    if sys.version_info[0] =! 3 and sys.version_info[1] != 7:
+    if sys.version_info[0] != 3 or sys.version_info[1] != 7:
         print(f"Python version {sys.version}")
         print("Incorrect version of Python detected. Must use Python version 3.7.x. You might want to try the command 'conda install python=3.7'.")
         exit(0)
